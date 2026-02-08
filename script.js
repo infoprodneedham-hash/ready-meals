@@ -28,6 +28,7 @@ const recipes = {
 
 let selectedRecipes = [];
 
+// Initialize App: Builds the visual cards
 function initApp() {
     const menuContainer = document.getElementById('menu-categories');
     menuContainer.innerHTML = ''; 
@@ -40,13 +41,12 @@ function initApp() {
         const grid = section.querySelector('.recipe-grid');
         
         recipes[category].forEach(recipe => {
-            // Create a container for the card
             const card = document.createElement('div');
             card.className = 'recipe-card';
             
             card.innerHTML = `
                 <div class="recipe-main">
-                    <span onclick="toggleMethod(this)" class="expand-icon">▼</span>
+                    <span class="expand-icon" onclick="toggleMethod(this)">▼</span>
                     <span class="recipe-name" onclick="toggleMethod(this)">${recipe.name}</span>
                     <button class="add-btn" onclick="addRecipe('${category}', '${recipe.name}')">Add</button>
                 </div>
@@ -62,12 +62,96 @@ function initApp() {
     loadFromStorage();
 }
 
-// New function to handle the expand/collapse
+// Expand/Collapse the Method section
 function toggleMethod(element) {
     const card = element.closest('.recipe-card');
     card.classList.toggle('expanded');
 }
 
-// REST OF YOUR FUNCTIONS (addRecipe, renderList, etc.) STAY THE SAME
+// Add recipe to the global selection
+function addRecipe(category, recipeName) {
+    const recipe = recipes[category].find(r => r.name === recipeName);
+    selectedRecipes.push(recipe);
+    saveToStorage();
+    renderList();
+    
+    // Brief visual feedback on the button
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Added!";
+    btn.style.backgroundColor = "#2ecc71";
+    setTimeout(() => {
+        btn.innerText = originalText;
+        btn.style.backgroundColor = "";
+    }, 1000);
+}
+
+// Generate the shopping list with multipliers
+function renderList() {
+    const listUl = document.getElementById('list-items');
+    const peopleSelect = document.getElementById('people-count');
+    const multiplier = peopleSelect ? parseInt(peopleSelect.value) : 1;
+    
+    listUl.innerHTML = "";
+
+    if (selectedRecipes.length === 0) {
+        listUl.innerHTML = "<p>Select recipes to see ingredients!</p>";
+        return;
+    }
+
+    const totals = {};
+
+    selectedRecipes.forEach(recipe => {
+        recipe.ingredients.forEach(ing => {
+            const key = `${ing.item}|${ing.unit}`;
+            const totalForThisRecipe = ing.qty * multiplier;
+            totals[key] = (totals[key] || 0) + totalForThisRecipe;
+        });
+    });
+
+    for (const [key, qty] of Object.entries(totals)) {
+        const [itemName, unit] = key.split('|');
+        const li = document.createElement('li');
+        const displayQty = Number.isInteger(qty) ? qty : qty.toFixed(1);
+        
+        li.innerHTML = `<strong>${displayQty}${unit}</strong> &nbsp; ${itemName}`;
+        // Optional: Tap an item to remove it from the list
+        li.onclick = () => removeItem(itemName);
+        listUl.appendChild(li);
+    }
+}
+
+function updateServings() {
+    renderList();
+}
+
+// Local Storage Handlers
+function saveToStorage() {
+    localStorage.setItem('mealPlannerData', JSON.stringify(selectedRecipes));
+}
+
+function loadFromStorage() {
+    const data = localStorage.getItem('mealPlannerData');
+    if (data) {
+        selectedRecipes = JSON.parse(data);
+        renderList();
+    }
+}
+
+function clearList() {
+    if (confirm("Clear your shopping list and start over?")) {
+        selectedRecipes = [];
+        saveToStorage();
+        renderList();
+    }
+}
+
+// Helper to remove single item if user changes mind
+function removeItem(name) {
+    selectedRecipes = selectedRecipes.filter(r => !r.ingredients.some(i => i.item === name));
+    saveToStorage();
+    renderList();
+}
+
 // Start app
 initApp();
