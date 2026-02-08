@@ -2,33 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Feast Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Meal Planner</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <header>
-    <h1>Meal Planner</h1>
-    <div class="people-selector">
-        <label>Cooking for:</label>
-        <select id="people-count" onchange="updateServings()">
-            <option value="1">1 Person</option>
-            <option value="2" selected>2 People</option>
-        </select>
-    </div>
-</header>
 
-    <main id="app">
+    <header>
+        <h1>Smart Meal Planner</h1>
+        <div class="people-selector">
+            <label for="people-count">Cooking for:</label>
+            <select id="people-count" onchange="updateServings()">
+                <option value="1">1 Person</option>
+                <option value="2" selected>2 People</option>
+                <option value="3">3 People</option>
+                <option value="4">4 People</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
         <section id="menu-categories"></section>
 
-        <hr>
+        <hr class="divider">
 
         <section id="shopping-list">
             <h2>Your Shopping List</h2>
+            <p class="list-hint">Tap a recipe above to add ingredients. Tap a list item to remove it.</p>
             <ul id="list-items">
-                <p>Select recipes to see ingredients!</p>
-            </ul>
-            <button onclick="clearList()" class="clear-btn">Clear List</button>
+                </ul>
+            
+            <button class="clear-btn" onclick="clearList()">Clear Everything</button>
         </section>
     </main>
 
